@@ -1,7 +1,10 @@
 package com.lazar.andric.homework.issuer;
 
 import com.lazar.andric.homework.tender.Tender;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +17,9 @@ import java.util.List;
 
 @Entity
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Issuer {
 
     @Id

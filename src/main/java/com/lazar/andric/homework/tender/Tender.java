@@ -2,7 +2,10 @@ package com.lazar.andric.homework.tender;
 
 import com.lazar.andric.homework.issuer.Issuer;
 import com.lazar.andric.homework.offer.Offer;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,6 +19,9 @@ import java.util.List;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Tender {
 
     @Id
