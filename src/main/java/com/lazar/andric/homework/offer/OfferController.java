@@ -19,4 +19,15 @@ public class OfferController {
     ResponseEntity<List<OfferDto>> getAllOfferForTender(@NotNull @PathVariable Long tenderId) {
         return ResponseEntity.ok(offerService.getAllOfferForTender(tenderId));
     }
+
+    @GetMapping("bidders/{bidderId}/offers")
+    ResponseEntity<List<OfferDto>> getOfferForBidder(@NotNull @PathVariable Long bidderId) {
+        return ResponseEntity.ok(offerService.getAllOfferForBidder(bidderId));
+    }
+
+    @GetMapping("bidders/{bidderId}/tenders/{tenderId}/offers")
+    ResponseEntity<List<OfferDto>> getAllBiddersOfferForSpecificTender(@NotNull @PathVariable Long bidderId,
+                                                                      @NotNull @PathVariable Long tenderId) {
+        return ResponseEntity.ok(offerService.getAllBiddersOfferForSpecificTender(bidderId, tenderId));
+    }
 }

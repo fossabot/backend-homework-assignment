@@ -1,7 +1,9 @@
 package com.lazar.andric.homework.offer;
 
+import com.lazar.andric.homework.bidder.BidderRepository;
 import com.lazar.andric.homework.tender.TenderRepository;
 import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
+import com.lazar.andric.homework.util.exceptions.ExceptionMessageFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,15 +16,44 @@ public class OfferService {
 
     private final OfferRepository offerRepository;
     private final TenderRepository tenderRepository;
+    private final BidderRepository bidderRepository;
     private final OfferMapper offerMapper;
 
     List<OfferDto> getAllOfferForTender(Long tenderId) {
-        if (tenderRepository.existsById(tenderId)) {
-            return offerRepository.findOfferByTenderId(tenderId)
-                                  .stream()
-                                  .map(offerMapper::toOfferDto)
-                                  .collect(Collectors.toList());
-        }
-        throw new EntityNotFoundException(String.format("Tender with id %s not found", tenderId));
+        throwExceptionIfTenderNotExists(tenderId);
+
+        return offerRepository.findOfferByTenderId(tenderId)
+                              .stream()
+                              .map(offerMapper::toOfferDto)
+                              .collect(Collectors.toList());
+    }
+
+    List<OfferDto> getAllOfferForBidder(Long bidderId) {
+        throwExceptionIfBidderNotExists(bidderId);
+
+        return offerRepository.findOfferByBidderId(bidderId)
+                              .stream()
+                              .map(offerMapper::toOfferDto)
+                              .collect(Collectors.toList());
+    }
+
+    List<OfferDto> getAllBiddersOfferForSpecificTender(Long bidderId, Long tenderId) {
+        throwExceptionIfBidderNotExists(bidderId);
+        throwExceptionIfTenderNotExists(tenderId);
+
+        return offerRepository.findOfferByBidderIdAndTenderId(bidderId, tenderId)
+                              .stream()
+                              .map(offerMapper::toOfferDto)
+                              .collect(Collectors.toList());
+    }
+
+    private void throwExceptionIfBidderNotExists(Long bidderId) {
+        if( !bidderRepository.existsById(bidderId))
+            throw new EntityNotFoundException(ExceptionMessageFormatter.formatEntityNotFoundMessage("Bidder", bidderId));
+    }
+
+    private void throwExceptionIfTenderNotExists(Long tenderId) {
+        if( !tenderRepository.existsById(tenderId))
+            throw new EntityNotFoundException(ExceptionMessageFormatter.formatEntityNotFoundMessage("Tender", tenderId));
     }
 }
