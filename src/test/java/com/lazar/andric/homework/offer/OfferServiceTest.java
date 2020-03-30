@@ -39,7 +39,7 @@ public class OfferServiceTest {
     private OfferMapper offerMapper = Mappers.getMapper(OfferMapper.class);
 
     private final Long ID = 1L;
-    private List<Offer> offersFromDB = new ArrayList<>(Arrays.asList(
+    private final List<Offer> offersFromDB = new ArrayList<>(Arrays.asList(
             Offer.builder().id(1L).amount(200).build(),
             Offer.builder().id(2L).amount(300).build())
     );
