@@ -16,6 +16,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -25,6 +28,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith({RestDocumentationExtension.class})
@@ -38,6 +42,8 @@ public class TenderControllerTest {
 
     private MockMvc mockMvc;
 
+    private final Long ID = 1L;
+
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext,
                       RestDocumentationContextProvider restDocumentation) throws Exception {
@@ -50,7 +56,7 @@ public class TenderControllerTest {
 
     @Test
     void testCreateTenderSuccess() throws Exception {
-        final Long ID = 1L;
+
         TenderDto submittedTenderDto = TenderDto.builder()
                                                 .description("description")
                                                 .build();
@@ -74,6 +80,26 @@ public class TenderControllerTest {
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(returnedTenderDto));
+    }
+
+    @Test
+    void getAllTendersForIssuers() throws Exception {
+
+        List<TenderDto> tendersForResponse = new ArrayList<>();
+        tendersForResponse.add(TenderDto.builder().id(1L).description("description 1").build());
+        tendersForResponse.add(TenderDto.builder().id(2L).description("description 2").build());
+
+        given(tenderService.getAllTendersForIssuers(ID))
+                .willReturn(tendersForResponse);
+
+
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/issuers/1/tenders/").contentType(MediaType.APPLICATION_JSON))
+                                                  .andReturn()
+                                                  .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(tendersForResponse));
     }
 
 }
