@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +42,12 @@ public class OfferControllerTest {
     @MockBean
     private OfferService offerService;
 
+    private final List<OfferDto> offersForResponse = new ArrayList<>(Arrays.asList(
+            OfferDto.builder().id(1L).amount(200).build(),
+            OfferDto.builder().id(2L).amount(300).build())
+    );
+    private final Long ID = 1L;
+
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext,
                       RestDocumentationContextProvider restDocumentation) throws Exception {
@@ -53,16 +60,43 @@ public class OfferControllerTest {
 
     @Test
     void testGetAllOfferForTender() throws Exception {
-        List<OfferDto> offersForResponse = new ArrayList<>();
-        offersForResponse.add(OfferDto.builder().id(1L).amount(200).build());
-        offersForResponse.add(OfferDto.builder().id(2L).amount(300).build());
 
-        given(offerService.getAllOfferForTender(1L))
+        given(offerService.getAllOfferForTender(ID))
                 .willReturn(offersForResponse);
 
 
         MockHttpServletResponse response = mockMvc.perform(
                 get("/tenders/1/offers").contentType(MediaType.APPLICATION_JSON))
+                                                  .andReturn()
+                                                  .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(offersForResponse));
+    }
+
+    @Test
+    void testGetOfferForBidder() throws Exception {
+
+        given(offerService.getAllOfferForBidder(ID))
+                .willReturn(offersForResponse);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/bidders/1/offers").contentType(MediaType.APPLICATION_JSON))
+                                                  .andReturn()
+                                                  .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(offersForResponse));
+    }
+
+    @Test
+    void testGetAllBiddersOfferForSpecificTender() throws Exception {
+
+        given(offerService.getAllBiddersOfferForSpecificTender(ID, ID))
+                .willReturn(offersForResponse);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/bidders/1/tenders/1/offers").contentType(MediaType.APPLICATION_JSON))
                                                   .andReturn()
                                                   .getResponse();
 

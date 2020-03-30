@@ -1,5 +1,6 @@
 package com.lazar.andric.homework.offer;
 
+import com.lazar.andric.homework.bidder.BidderRepository;
 import com.lazar.andric.homework.tender.TenderRepository;
 import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,17 +32,22 @@ public class OfferServiceTest {
     @Mock
     private TenderRepository tenderRepository;
 
+    @Mock
+    private BidderRepository bidderRepository;
+
     @Spy
     private OfferMapper offerMapper = Mappers.getMapper(OfferMapper.class);
 
     private final Long ID = 1L;
+    private final List<Offer> offersFromDB = new ArrayList<>(Arrays.asList(
+            Offer.builder().id(1L).amount(200).build(),
+            Offer.builder().id(2L).amount(300).build())
+    );
+    private List<OfferDto> offersForResponse = offersFromDB.stream().map(offerMapper::toOfferDto).collect(Collectors.toList());
 
     @Test
     void testGetAllOfferForTenderSuccess() {
-        List<Offer> offersFromDB = new ArrayList<>();
-        offersFromDB.add(Offer.builder().id(1L).amount(200).build());
-        offersFromDB.add(Offer.builder().id(2L).amount(300).build());
-        List<OfferDto> offersForResponse = offersFromDB.stream().map(offerMapper::toOfferDto).collect(Collectors.toList());
+
 
         given(tenderRepository.existsById(ID)).willReturn(true);
         given(offerRepository.findOfferByTenderId(ID)).willReturn(offersFromDB);
@@ -56,4 +63,51 @@ public class OfferServiceTest {
             offerService.getAllOfferForTender(ID);
         }).isInstanceOf(EntityNotFoundException.class);
     }
+
+    @Test
+    void testGetAllOfferForBidderSuccess() {
+        given(bidderRepository.existsById(ID)).willReturn(true);
+        given(offerRepository.findOfferByBidderId(ID)).willReturn(offersFromDB);
+
+        assertThat(offerService.getAllOfferForBidder(ID)).isEqualTo(offersForResponse);
+    }
+
+    @Test
+    void testGetAllOfferForBidderThrowException() {
+        given(bidderRepository.existsById(ID)).willReturn(false);
+
+        assertThatThrownBy( () -> {
+            offerService.getAllOfferForBidder(ID);
+        }).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void testGetAllBiddersOfferForSpecificTenderSuccess() {
+        given(bidderRepository.existsById(ID)).willReturn(true);
+        given(tenderRepository.existsById(ID)).willReturn(true);
+        given(offerRepository.findOfferByBidderIdAndTenderId(ID, ID)).willReturn(offersFromDB);
+
+        assertThat(offerService.getAllBiddersOfferForSpecificTender(ID, ID)).isEqualTo(offersForResponse);
+    }
+
+    @Test
+    void testGetAllBiddersOfferForSpecificTenderThrowExceptionForBidderNotFound() {
+        given(bidderRepository.existsById(ID)).willReturn(false);
+
+        assertThatThrownBy( () -> {
+            offerService.getAllBiddersOfferForSpecificTender(ID, ID);
+        }).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void testGetAllBiddersOfferForSpecificTenderThrowExceptionForTenderNotFound() {
+        given(bidderRepository.existsById(ID)).willReturn(true);
+        given(tenderRepository.existsById(ID)).willReturn(false);
+
+        assertThatThrownBy( () -> {
+            offerService.getAllBiddersOfferForSpecificTender(ID, ID);
+        }).isInstanceOf(EntityNotFoundException.class);
+    }
+
+
 }
