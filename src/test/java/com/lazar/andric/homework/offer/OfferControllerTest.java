@@ -1,6 +1,7 @@
-package com.lazar.andric.homework.tender;
+package com.lazar.andric.homework.offer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lazar.andric.homework.tender.TenderController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,25 +27,19 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith({RestDocumentationExtension.class})
-@WebMvcTest(controllers = TenderController.class)
+@WebMvcTest(controllers = OfferController.class)
 @AutoConfigureRestDocs(outputDir = "build/generated-snippets")
-public class TenderControllerTest {
+public class OfferControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private MockMvc mockMvc;
 
-    private final Long ID = 1L;
-
     @MockBean
-    private TenderService tenderService;
-
+    private OfferService offerService;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext,
@@ -57,51 +52,21 @@ public class TenderControllerTest {
     }
 
     @Test
-    void testCreateTenderSuccess() throws Exception {
+    void testGetAllOfferForTender() throws Exception {
+        List<OfferDto> offersForResponse = new ArrayList<>();
+        offersForResponse.add(OfferDto.builder().id(1L).amount(200).build());
+        offersForResponse.add(OfferDto.builder().id(2L).amount(300).build());
 
-        TenderDto submittedTenderDto = TenderDto.builder()
-                                                .description("description")
-                                                .build();
-        TenderDto returnedTenderDto = TenderDto.builder()
-                                               .id(ID)
-                                               .description("description")
-                                               .build();
+        given(offerService.getAllOfferForTender(1L))
+                .willReturn(offersForResponse);
 
-        given(tenderService.createTenderForIssuer(ID, submittedTenderDto))
-                .willReturn(returnedTenderDto);
 
         MockHttpServletResponse response = mockMvc.perform(
-                post("/issuers/1/tenders/").contentType(MediaType.APPLICATION_JSON)
-                                           .content(objectMapper.writeValueAsString(submittedTenderDto))
-        )
-                                                  .andDo(document("testCreateTenderSuccess",
-                                                          requestFields(fieldWithPath("id").description("The id of tender"),
-                                                                  fieldWithPath("description").description("The description of tender"))))
+                get("/tenders/1/offers").contentType(MediaType.APPLICATION_JSON))
                                                   .andReturn()
                                                   .getResponse();
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(returnedTenderDto));
+        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(offersForResponse));
     }
-
-    @Test
-    void getAllTendersForIssuers() throws Exception {
-
-        List<TenderDto> tendersForResponse = new ArrayList<>();
-        tendersForResponse.add(TenderDto.builder().id(1L).description("description 1").build());
-        tendersForResponse.add(TenderDto.builder().id(2L).description("description 2").build());
-
-        given(tenderService.getAllTendersForIssuers(ID))
-                .willReturn(tendersForResponse);
-
-
-        MockHttpServletResponse response = mockMvc.perform(
-                get("/issuers/1/tenders/").contentType(MediaType.APPLICATION_JSON))
-                                                  .andReturn()
-                                                  .getResponse();
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(tendersForResponse));
-    }
-
 }
