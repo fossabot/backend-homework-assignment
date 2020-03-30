@@ -23,4 +23,6 @@ INSERT INTO offer (amount, accepted, tender_id, bidder_id) VALUES
   (400, false, 2, 3),
   (200, false, 2, 4),
   (500, true, 2, 5),
-  (200, false, 3, 6);
+  (200, false, 3, 6),
+  (400, false, 1, 1),
+  (500, false, 2, 1);

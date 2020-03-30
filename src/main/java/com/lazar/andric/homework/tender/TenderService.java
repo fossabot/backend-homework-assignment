@@ -3,6 +3,7 @@ package com.lazar.andric.homework.tender;
 import com.lazar.andric.homework.issuer.Issuer;
 import com.lazar.andric.homework.issuer.IssuerRepository;
 import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
+import com.lazar.andric.homework.util.exceptions.ExceptionMessageFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,6 @@ public class TenderService {
     }
 
     private String formatExceptionMessage(Long issuerId) throws EntityNotFoundException {
-        return String.format("Issuer with id %s not found", issuerId);
+        return ExceptionMessageFormatter.formatEntityNotFoundMessage("Issuer", issuerId);
     }
 }
