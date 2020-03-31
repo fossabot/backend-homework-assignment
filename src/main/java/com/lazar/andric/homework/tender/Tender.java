@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -29,6 +30,9 @@ public class Tender {
     private Long id;
 
     private String description;
+
+    @Column(name = "closed_for_offers")
+    private boolean closedForOffers;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "issuer_id")

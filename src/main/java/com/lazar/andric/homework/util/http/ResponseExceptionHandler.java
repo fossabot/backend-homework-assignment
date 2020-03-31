@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestControllerAdvice
@@ -25,5 +28,17 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         final String message = ex.getMessage();
 
         return new HttpErrorInfo(httpStatus, message, request.getRequestURI());
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public final ResponseEntity<ValidationErrorResponse> handleConstraintValidationException(HttpServletRequest request,
+                                                                                             ConstraintViolationException ex) {
+        ValidationErrorResponse error = new ValidationErrorResponse();
+        for (ConstraintViolation violation : ex.getConstraintViolations()) {
+            error.getViolations().add(
+                    new HttpErrorInfo(BAD_REQUEST, violation.getMessageTemplate(), request.getRequestURI()));
+        }
+        return new ResponseEntity<>(error, BAD_REQUEST);
     }
 }
