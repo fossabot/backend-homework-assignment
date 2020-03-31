@@ -1,7 +1,9 @@
 package com.lazar.andric.homework.offer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lazar.andric.homework.tender.TenderController;
+import com.lazar.andric.homework.tender.Tender;
+import com.lazar.andric.homework.tender.TenderRepository;
+import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,8 +22,12 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -29,6 +35,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith({RestDocumentationExtension.class})
 @WebMvcTest(controllers = OfferController.class)
@@ -41,6 +48,9 @@ public class OfferControllerTest {
 
     @MockBean
     private OfferService offerService;
+
+    @MockBean
+    private TenderRepository tenderRepository;
 
     private final List<OfferDto> offersForResponse = new ArrayList<>(Arrays.asList(
             OfferDto.builder().id(1L).amount(200).build(),
@@ -102,5 +112,41 @@ public class OfferControllerTest {
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(offersForResponse));
+    }
+
+    @Test
+    void testSubmitNewOffer() throws Exception {
+        OfferDto offerDtoForResponse = offersForResponse.get(0);
+        OfferDto offerDtoForRequest = OfferDto.builder().amount(200).build();
+
+        given(tenderRepository.findById(any())).willReturn(Optional.of(new Tender()));
+        given(offerService.saveNewOffer(any(), anyLong(), anyLong()))
+                .willReturn(offerDtoForResponse);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/bidders/1/tenders/1/offers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(offerDtoForRequest)))
+                                                  .andReturn()
+                                                  .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(offerDtoForResponse));
+    }
+
+    @Test
+    void testSubmitNewOfferReturn400WhenTenderClosed() throws Exception {
+        OfferDto offerDtoForRequest = OfferDto.builder().amount(200).build();
+
+        given(tenderRepository.findById(any())).willReturn(Optional.of(Tender.builder().closedForOffers(true).build()));
+
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/bidders/1/tenders/1/offers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(offerDtoForRequest)))
+                                                  .andReturn()
+                                                  .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 }

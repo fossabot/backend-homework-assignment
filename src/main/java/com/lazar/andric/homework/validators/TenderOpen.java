@@ -51,6 +51,6 @@ class TenderOpenValidator implements ConstraintValidator<TenderOpen, Long> {
         if (tender.isPresent()) {
             return !tender.get().isClosedForOffers();
         }
-        throw new EntityNotFoundException(ExceptionMessageFormatter.formatEntityNotFoundMessage("Tender", value));
+        return false;
     }
 }
