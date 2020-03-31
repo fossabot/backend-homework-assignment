@@ -9,4 +9,5 @@ import org.mapstruct.ReportingPolicy;
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface OfferMapper {
     OfferDto toOfferDto(Offer offer);
+    Offer toOffer(OfferDto offerDto);
 }
