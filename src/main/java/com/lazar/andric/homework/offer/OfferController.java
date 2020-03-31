@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
@@ -27,7 +29,14 @@ public class OfferController {
 
     @GetMapping("bidders/{bidderId}/tenders/{tenderId}/offers")
     ResponseEntity<List<OfferDto>> getAllBiddersOfferForSpecificTender(@NotNull @PathVariable Long bidderId,
-                                                                      @NotNull @PathVariable Long tenderId) {
+                                                                       @NotNull @PathVariable Long tenderId) {
         return ResponseEntity.ok(offerService.getAllBiddersOfferForSpecificTender(bidderId, tenderId));
+    }
+
+    @PostMapping("bidders/{bidderId}/tenders/{tenderId}/offers")
+    ResponseEntity<OfferDto> submitNewOffer(@NotNull @PathVariable Long bidderId,
+                                            @NotNull @PathVariable Long tenderId,
+                                            @RequestBody OfferDto offerDto) {
+        return ResponseEntity.ok(offerService.saveNewOffer(offerDto, tenderId, bidderId));
     }
 }
