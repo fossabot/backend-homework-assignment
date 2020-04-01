@@ -4,7 +4,6 @@ import com.lazar.andric.homework.bidder.Bidder;
 import com.lazar.andric.homework.bidder.BidderRepository;
 import com.lazar.andric.homework.tender.Tender;
 import com.lazar.andric.homework.tender.TenderRepository;
-import com.lazar.andric.homework.tender.TenderService;
 import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
 import com.lazar.andric.homework.util.exceptions.ExceptionMessageFormatter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ public class OfferService {
 
     private final OfferRepository offerRepository;
     private final TenderRepository tenderRepository;
-    private final TenderService tenderService;
     private final BidderRepository bidderRepository;
     private final OfferMapper offerMapper;
 
@@ -58,7 +56,8 @@ public class OfferService {
     }
 
     private void throwExceptionIfTenderNotExists(Long tenderId) {
-        tenderService.throwExceptionIfTenderNotExists(tenderId);
+        if( !tenderRepository.existsById(tenderId))
+            throw new EntityNotFoundException(ExceptionMessageFormatter.formatEntityNotFoundMessage("Bidder", tenderId));
     }
 
     OfferDto saveNewOffer(OfferDto offerDto, Long tenderId, Long bidderId) {
