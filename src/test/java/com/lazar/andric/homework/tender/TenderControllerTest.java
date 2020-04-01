@@ -23,13 +23,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 
 @ExtendWith({RestDocumentationExtension.class})
 @WebMvcTest(controllers = TenderController.class)
@@ -71,12 +71,11 @@ public class TenderControllerTest {
                 .willReturn(returnedTenderDto);
 
         MockHttpServletResponse response = mockMvc.perform(
-                post("/issuers/1/tenders/").contentType(MediaType.APPLICATION_JSON)
-                                           .content(objectMapper.writeValueAsString(submittedTenderDto))
-        )
-                                                  .andDo(document("testCreateTenderSuccess",
-                                                          requestFields(fieldWithPath("id").description("The id of tender"),
-                                                                  fieldWithPath("description").description("The description of tender"))))
+                post("/issuers/{issuerId}/tenders/", ID).contentType(MediaType.APPLICATION_JSON)
+                                           .content(objectMapper.writeValueAsString(submittedTenderDto)))
+                                                  .andDo(document("{methodName}", pathParameters(
+                                                          parameterWithName("issuerId").description("The id of issuer")
+                                                  )))
                                                   .andReturn()
                                                   .getResponse();
 
@@ -96,7 +95,10 @@ public class TenderControllerTest {
 
 
         MockHttpServletResponse response = mockMvc.perform(
-                get("/issuers/1/tenders/").contentType(MediaType.APPLICATION_JSON))
+                get("/issuers/{issuerId}/tenders/", ID).contentType(MediaType.APPLICATION_JSON))
+                                                  .andDo(document("{methodName}", pathParameters(
+                                                          parameterWithName("issuerId").description("The id of issuer")
+                                                  )))
                                                   .andReturn()
                                                   .getResponse();
 

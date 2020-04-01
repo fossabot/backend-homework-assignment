@@ -3,7 +3,6 @@ package com.lazar.andric.homework.offer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lazar.andric.homework.tender.Tender;
 import com.lazar.andric.homework.tender.TenderRepository;
-import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -34,8 +32,10 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 
 @ExtendWith({RestDocumentationExtension.class})
 @WebMvcTest(controllers = OfferController.class)
@@ -76,7 +76,10 @@ public class OfferControllerTest {
 
 
         MockHttpServletResponse response = mockMvc.perform(
-                get("/tenders/1/offers").contentType(MediaType.APPLICATION_JSON))
+                get("/tenders/{tenderId}/offers", ID).contentType(MediaType.APPLICATION_JSON))
+                                                  .andDo(document("{methodName}", pathParameters(
+                                                          parameterWithName("tenderId").description("The id of tender")
+                                                  )))
                                                   .andReturn()
                                                   .getResponse();
 
@@ -85,13 +88,16 @@ public class OfferControllerTest {
     }
 
     @Test
-    void testGetOfferForBidder() throws Exception {
+    void testGetOffersForBidder() throws Exception {
 
         given(offerService.getAllOfferForBidder(ID))
                 .willReturn(offersForResponse);
 
         MockHttpServletResponse response = mockMvc.perform(
-                get("/bidders/1/offers").contentType(MediaType.APPLICATION_JSON))
+                get("/bidders/{bidderId}/offers", ID).contentType(MediaType.APPLICATION_JSON))
+                                                  .andDo(document("{methodName}", pathParameters(
+                                                          parameterWithName("bidderId").description("The id of bidder")
+                                                  )))
                                                   .andReturn()
                                                   .getResponse();
 
@@ -100,13 +106,17 @@ public class OfferControllerTest {
     }
 
     @Test
-    void testGetAllBiddersOfferForSpecificTender() throws Exception {
+    void testGetAllBidderOffersForSpecificTender() throws Exception {
 
         given(offerService.getAllBiddersOfferForSpecificTender(ID, ID))
                 .willReturn(offersForResponse);
 
         MockHttpServletResponse response = mockMvc.perform(
-                get("/bidders/1/tenders/1/offers").contentType(MediaType.APPLICATION_JSON))
+                get("/bidders/{bidderId}/tenders/{tenderId}/offers", ID, ID).contentType(MediaType.APPLICATION_JSON))
+                                                  .andDo(document("{methodName}", pathParameters(
+                                                          parameterWithName("bidderId").description("The id of bidder"),
+                                                          parameterWithName("tenderId").description("The id of tender")
+                                                  )))
                                                   .andReturn()
                                                   .getResponse();
 
@@ -124,9 +134,13 @@ public class OfferControllerTest {
                 .willReturn(offerDtoForResponse);
 
         MockHttpServletResponse response = mockMvc.perform(
-                post("/bidders/1/tenders/1/offers")
+                post("/bidders/{bidderId}/tenders/{tenderId}/offers", ID, ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(offerDtoForRequest)))
+                                                  .andDo(document("{methodName}", pathParameters(
+                                                          parameterWithName("bidderId").description("The id of bidder"),
+                                                          parameterWithName("tenderId").description("The id of tender")
+                                                  )))
                                                   .andReturn()
                                                   .getResponse();
 
