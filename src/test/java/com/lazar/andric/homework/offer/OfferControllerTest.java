@@ -3,6 +3,7 @@ package com.lazar.andric.homework.offer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lazar.andric.homework.tender.Tender;
 import com.lazar.andric.homework.tender.TenderRepository;
+import com.lazar.andric.homework.tender.TenderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
@@ -48,6 +50,9 @@ public class OfferControllerTest {
 
     @MockBean
     private OfferService offerService;
+
+    @MockBean
+    private TenderService tenderService;
 
     @MockBean
     private TenderRepository tenderRepository;
@@ -162,5 +167,25 @@ public class OfferControllerTest {
                                                   .getResponse();
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    void testAcceptOffer() throws Exception {
+        OfferDto offerDtoForResponse = offersForResponse.get(0);
+
+        given(tenderRepository.findById(any())).willReturn(Optional.of(new Tender()));
+        given(offerService.acceptOffer(anyLong(), anyLong())).willReturn(offerDtoForResponse);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                patch("/tenders/{tenderId}/offers/{offerId}", ID, ID).contentType(MediaType.APPLICATION_JSON))
+                                                  .andDo(document("{methodName}", pathParameters(
+                                                          parameterWithName("tenderId").description("The id of tender"),
+                                                          parameterWithName("offerId").description("The id of offer")
+                                                  )))
+                                                  .andReturn()
+                                                  .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(objectMapper.writeValueAsString(offerDtoForResponse));
     }
 }

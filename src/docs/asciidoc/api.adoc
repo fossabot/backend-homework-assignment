@@ -116,3 +116,22 @@ include::{snippets}/testSubmitNewOffer/path-parameters.adoc[]
 ==== HTTP response
 
 include::{snippets}/testSubmitNewOffer/http-response.adoc[]
+
+[[resource-accept-offer]]
+=== Accepting offer
+
+==== Curl request
+
+include::{snippets}/testAcceptOffer/curl-request.adoc[]
+
+==== HTTP request
+
+include::{snippets}/testAcceptOffer/http-request.adoc[]
+
+==== Path parameters
+
+include::{snippets}/testAcceptOffer/path-parameters.adoc[]
+
+==== HTTP response
+
+include::{snippets}/testAcceptOffer/http-response.adoc[]

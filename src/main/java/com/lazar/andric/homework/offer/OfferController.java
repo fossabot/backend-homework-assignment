@@ -52,8 +52,8 @@ public class OfferController {
     @PatchMapping("tenders/{tenderId}/offers/{offerId}")
     ResponseEntity<OfferDto> acceptOffer(@NotNull @TenderOpen @PathVariable Long tenderId,
                                   @NotNull @PathVariable Long offerId){
-        OfferDto acceptOffer = offerService.acceptOffer(offerId, tenderId);
+        OfferDto acceptedOffer = offerService.acceptOffer(offerId, tenderId);
         tenderService.closeTenderForNewOffers(tenderId);
-        return ResponseEntity.ok(acceptOffer);
+        return ResponseEntity.ok(acceptedOffer);
     }
 }

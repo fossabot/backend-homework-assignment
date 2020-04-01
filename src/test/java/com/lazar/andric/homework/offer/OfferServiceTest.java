@@ -1,7 +1,10 @@
 package com.lazar.andric.homework.offer;
 
+import com.lazar.andric.homework.bidder.Bidder;
 import com.lazar.andric.homework.bidder.BidderRepository;
+import com.lazar.andric.homework.tender.Tender;
 import com.lazar.andric.homework.tender.TenderRepository;
+import com.lazar.andric.homework.tender.TenderService;
 import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,10 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,8 +46,8 @@ public class OfferServiceTest {
 
     private final Long ID = 1L;
     private final List<Offer> offersFromDB = new ArrayList<>(Arrays.asList(
-            Offer.builder().id(1L).amount(200).build(),
-            Offer.builder().id(2L).amount(300).build())
+            Offer.builder().id(1L).amount(200).accepted(false).build(),
+            Offer.builder().id(2L).amount(300).accepted(false).build())
     );
     private List<OfferDto> offersForResponse = offersFromDB.stream().map(offerMapper::toOfferDto).collect(Collectors.toList());
 
@@ -109,5 +115,60 @@ public class OfferServiceTest {
         }).isInstanceOf(EntityNotFoundException.class);
     }
 
+    @Test
+    void testSaveNewOfferSuccess() {
+        OfferDto offerToSave = offerMapper.toOfferDto(offersFromDB.get(0));
+        OfferDto offerForResponse = offerMapper.toOfferDto(offersFromDB.get(0));
+
+        given(bidderRepository.existsById(anyLong())).willReturn(true);
+        given(tenderRepository.existsById(anyLong())).willReturn(true);
+        given(offerRepository.save(any())).willReturn(offersFromDB.get(0));
+
+        assertThat(offerService.saveNewOffer(offerToSave, ID, ID)).isEqualTo(offerForResponse);
+    }
+
+    @Test
+    void testSaveNewOfferThrowExceptionForBidderNotFound() {
+        OfferDto offerToSave = offerMapper.toOfferDto(offersFromDB.get(0));
+
+        given(bidderRepository.existsById(anyLong())).willReturn(false);
+
+        assertThatThrownBy( () -> {
+            offerService.saveNewOffer(offerToSave, ID, ID);
+        }).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void testSaveNewOfferThrowExceptionForTenderNotFound() {
+        OfferDto offerToSave = offerMapper.toOfferDto(offersFromDB.get(0));
+
+        given(bidderRepository.existsById(anyLong())).willReturn(true);
+        given(tenderRepository.existsById(anyLong())).willReturn(false);
+
+        assertThatThrownBy( () -> {
+            offerService.saveNewOffer(offerToSave, ID, ID);
+        }).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void testAcceptOfferSuccess() {
+        OfferDto offerForResponse = offerMapper.toOfferDto(offersFromDB.get(0));
+        offerForResponse.setAccepted(true);
+        Offer offerFromDb = offersFromDB.get(0);
+
+        given(offerRepository.findOfferByIdAndTenderId(anyLong(), anyLong())).willReturn(Optional.of(offerFromDb));
+        given(offerRepository.save(any())).willReturn(offerFromDb);
+
+        assertThat(offerService.acceptOffer(ID, ID)).isEqualTo(offerForResponse);
+    }
+
+    @Test
+    void testAcceptOfferThrowException() {
+        given(offerRepository.findOfferByIdAndTenderId(anyLong(), anyLong())).willReturn(Optional.empty());
+
+        assertThatThrownBy( () -> {
+            offerService.acceptOffer(ID, ID);
+        }).isInstanceOf(EntityNotFoundException.class);
+    }
 
 }
