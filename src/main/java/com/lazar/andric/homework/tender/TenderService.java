@@ -43,4 +43,16 @@ public class TenderService {
     private String formatExceptionMessage(Long issuerId) throws EntityNotFoundException {
         return ExceptionMessageFormatter.formatEntityNotFoundMessage("Issuer", issuerId);
     }
+
+    public void closeTenderForNewOffers(Long tenderId) {
+        throwExceptionIfTenderNotExists(tenderId);
+        Tender tender = tenderRepository.getOne(tenderId);
+        tender.setClosedForOffers(true);
+        tenderRepository.save(tender);
+    }
+
+    public void throwExceptionIfTenderNotExists(Long tenderId) {
+        if( !tenderRepository.existsById(tenderId))
+            throw new EntityNotFoundException(ExceptionMessageFormatter.formatEntityNotFoundMessage("Tender", tenderId));
+    }
 }
