@@ -1,16 +1,118 @@
-= Lazar Andric Backend Assigment REST Docs
+== Lazar Andric Backend Assigment REST Docs
 
-[[example_curl_request]]
-== Curl request
+[[resource-tender-create]]
+=== Creating tender
+
+==== Curl request
 
 include::{snippets}/testCreateTenderSuccess/curl-request.adoc[]
 
-[[example_http_request]]
-== HTTP request
+==== HTTP request
 
 include::{snippets}/testCreateTenderSuccess/http-request.adoc[]
 
-[[example_http_response]]
-== HTTP response
+==== Path parameters
+
+include::{snippets}/testCreateTenderSuccess/path-parameters.adoc[]
+
+==== HTTP response
 
 include::{snippets}/testCreateTenderSuccess/http-response.adoc[]
+
+[[resource-tenders-get]]
+=== Getting all tenders for issuer
+
+==== Curl request
+
+include::{snippets}/getAllTendersForIssuers/curl-request.adoc[]
+
+==== HTTP request
+
+include::{snippets}/getAllTendersForIssuers/http-request.adoc[]
+
+==== Path parameters
+
+include::{snippets}/getAllTendersForIssuers/path-parameters.adoc[]
+
+==== HTTP response
+
+include::{snippets}/getAllTendersForIssuers/http-response.adoc[]
+
+
+[[resource-offer-for-tender-get]]
+=== Getting all offer for tender
+
+==== Curl request
+
+include::{snippets}/testGetAllOfferForTender/curl-request.adoc[]
+
+==== HTTP request
+
+include::{snippets}/testGetAllOfferForTender/http-request.adoc[]
+
+==== Path parameters
+
+include::{snippets}/testGetAllOfferForTender/path-parameters.adoc[]
+
+==== HTTP response
+
+include::{snippets}/testGetAllOfferForTender/http-response.adoc[]
+
+
+[[resource-offer-for-bider-get]]
+=== Getting all offer for bidder
+
+==== Curl request
+
+include::{snippets}/testGetOffersForBidder/curl-request.adoc[]
+
+==== HTTP request
+
+include::{snippets}/testGetOffersForBidder/http-request.adoc[]
+
+==== Path parameters
+
+include::{snippets}/testGetOffersForBidder/path-parameters.adoc[]
+
+==== HTTP response
+
+include::{snippets}/testGetOffersForBidder/http-response.adoc[]
+
+
+[[resource-offer-for-bider-and-specific-tender-get]]
+=== Getting all offer for bidder and specific tender
+
+==== Curl request
+
+include::{snippets}/testGetAllBidderOffersForSpecificTender/curl-request.adoc[]
+
+==== HTTP request
+
+include::{snippets}/testGetAllBidderOffersForSpecificTender/http-request.adoc[]
+
+==== Path parameters
+
+include::{snippets}/testGetAllBidderOffersForSpecificTender/path-parameters.adoc[]
+
+==== HTTP response
+
+include::{snippets}/testGetAllBidderOffersForSpecificTender/http-response.adoc[]
+
+[[resource-submit-new-offer]]
+=== Submitting new offer
+
+==== Curl request
+
+include::{snippets}/testSubmitNewOffer/curl-request.adoc[]
+
+==== HTTP request
+
+include::{snippets}/testSubmitNewOffer/http-request.adoc[]
+
+==== Path parameters
+
+include::{snippets}/testSubmitNewOffer/path-parameters.adoc[]
+
+==== HTTP response
+
+include::{snippets}/testSubmitNewOffer/http-response.adoc[]
