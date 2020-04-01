@@ -28,7 +28,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = TenderOpenValidator.class)
 @Documented
 public @interface TenderOpen {
-    String message() default "Tender not open for new offers.";
+    String message() default "Tender not open for new offers or does not exist";
 
     Class<?>[] groups() default { };
 

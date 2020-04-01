@@ -4,6 +4,7 @@ import com.lazar.andric.homework.bidder.Bidder;
 import com.lazar.andric.homework.bidder.BidderRepository;
 import com.lazar.andric.homework.tender.Tender;
 import com.lazar.andric.homework.tender.TenderRepository;
+import com.lazar.andric.homework.tender.TenderService;
 import com.lazar.andric.homework.util.exceptions.EntityNotFoundException;
 import com.lazar.andric.homework.util.exceptions.ExceptionMessageFormatter;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class OfferService {
 
     private final OfferRepository offerRepository;
     private final TenderRepository tenderRepository;
+    private final TenderService tenderService;
     private final BidderRepository bidderRepository;
     private final OfferMapper offerMapper;
 
@@ -56,8 +58,7 @@ public class OfferService {
     }
 
     private void throwExceptionIfTenderNotExists(Long tenderId) {
-        if( !tenderRepository.existsById(tenderId))
-            throw new EntityNotFoundException(ExceptionMessageFormatter.formatEntityNotFoundMessage("Tender", tenderId));
+        tenderService.throwExceptionIfTenderNotExists(tenderId);
     }
 
     OfferDto saveNewOffer(OfferDto offerDto, Long tenderId, Long bidderId) {
@@ -72,5 +73,16 @@ public class OfferService {
         offer.setAccepted(false);
         Offer savedOffer = offerRepository.save(offer);
         return offerMapper.toOfferDto(savedOffer);
+    }
+
+    public OfferDto acceptOffer(Long offerId, Long tenderId) {
+        Optional<Offer> foundOffer = offerRepository.findOfferByIdAndTenderId(offerId, tenderId);
+        if(foundOffer.isPresent()) {
+            Offer offer = foundOffer.get();
+            offer.setAccepted(true);
+            Offer acceptedOffer = offerRepository.save(offer);
+            return offerMapper.toOfferDto(acceptedOffer);
+        }
+        throw new EntityNotFoundException(String.format("Offer with given id %s and tender id %s not found", offerId, tenderId));
     }
 }
